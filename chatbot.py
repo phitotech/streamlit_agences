@@ -1,25 +1,27 @@
 import os
-from langchain.llms import GoogleGenerativeAI
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import SQLDatabaseChain
 from langchain.sql_database import SQLDatabase
-from langchain.agents.agent_toolkits import SQLDatabaseToolkit
-from langchain.agents import initialize_agent, AgentType
-from dotenv import load_dotenv
 
+# 🔐 Charger la clé API Gemini depuis .env ou les secrets Streamlit Cloud
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
-llm = GoogleGenerativeAI(model="gemini-pro", google_api_key=api_key)
+# 🧠 Initialiser le modèle Gemini
+llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=api_key)
+
+# 🗃️ Connexion à la base SQLite
 db = SQLDatabase.from_uri("sqlite:///database.db")
-toolkit = SQLDatabaseToolkit(db=db, llm=llm)
 
-agent_executor = initialize_agent(
-    tools=toolkit.get_tools(),
-    llm=llm,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=False
-)
+# 🔗 Créer la chaîne d'interrogation SQL via LangChain
+chain = SQLDatabaseChain.from_llm(llm=llm, database=db, verbose=False)
 
+# 💬 Fonction d'interrogation
 def interroger_chatbot(question):
-    return agent_executor.run(question)
+    try:
+        return chain.run(question)
+    except Exception as e:
+        return f"Erreur lors de l'interrogation : {str(e)}"
+
 
