@@ -1,7 +1,7 @@
+
 import sqlite3
 from datetime import datetime
 
-# Exemple de mise à jour automatique
 conn = sqlite3.connect("database.db")
 cursor = conn.cursor()
 
@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS sources (
 )
 """)
 
-# Exemple d'insertion
 cursor.execute("""
 INSERT INTO sources (nom, type, region, theme, url, date_collecte)
 VALUES (?, ?, ?, ?, ?, ?)
